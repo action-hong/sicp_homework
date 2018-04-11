@@ -1,0 +1,30 @@
+(define (sum term a next b)
+  (if (> a b)
+    0
+    (+ (term a)
+       (sum term (next a) next b)
+    )))
+
+(define (even n)
+  (= (remainder n 2) 0))
+
+(define (simpson f a b n)
+  (define h (/ (- b a) n))
+  (define (term k)
+    (define res (f (+ a (* k h))))
+    (cond ((or (= k 0) (= k n)) res)
+          ((even k) (* 2 res))
+          (else (* 4 res))      
+    )
+  )
+  (define (next a)
+    (+ a 1))
+  (* (/ h 3)
+     (sum term 0 next n) 
+  )
+)
+
+(define (f x)
+  (* x x))
+
+(simpson f 0 1 100)
