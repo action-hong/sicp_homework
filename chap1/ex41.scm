@@ -1,0 +1,2 @@
+(define (double foo)
+  body)
