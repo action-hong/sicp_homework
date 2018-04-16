@@ -3,6 +3,9 @@
     ((filter a) (combiner (term a) (filter-accumulate combiner null-value filter term (next a) next b)))
     (else (filter-accumulate combiner null-value filter term (next a) next b))))
 
+(define (prime? n)
+  (= (small-divisor n) n))
+
 (define (small-divisor n)
   (find-divisor n 2))
 
@@ -22,8 +25,7 @@
 (define (square n)
   (* n n))
 
-(define (prime? n)
-  (= (small-divisor n) n))
+
 
 (define (integer n)
   n)
