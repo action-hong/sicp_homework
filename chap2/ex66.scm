@@ -1,0 +1,6 @@
+(define (look-up given-key tree)
+  (cond ((null? tree) #f)
+        ((= (key (entry tree))) (entry tree))
+        ((> (key (entry tree))) (look-up given-key (right-branch tree)))
+        ((< (key (entry tree))) (look-up given-key (left-branch tree)))
+    ))
