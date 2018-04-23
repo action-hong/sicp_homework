@@ -32,25 +32,6 @@
     (weight-leaf tree)
     (cadddr tree)))
 
-(define (choose-branch bit branch)
-    ;0 向左 1向右
-  (cond ((= bit 0) (left-branch branch))
-        ((= bit 1) (right-branch branch))
-        (else (error "bad bit --CHOOSE-BRANCH" bit))
-        ))
-
-(define (decode bits tree)
-  (define (decode-1 bits current-branch)
-    (if (null? bits)
-      `()
-      (let ((next-branch (choose-branch (car bits) current-branch)))
-        (if (leaf? next-branch)
-          (cons (symbol-leaf next-branch) (decode-1 (cdr bits) tree))
-          (decode-1 (cdr bits) next-branch))))  
-  )
-  (decode-1 bits tree)
-)
-
 (define (adjoin-set x set)
   (cond ((null? set) (list x))
         ((< (weight x) (weight (car set))) (cons x set))
@@ -62,18 +43,9 @@
     `()
     (let ((pair (car pairs)))
       (adjoin-set (make-leaf (car pair)   ;symbol
-                             (cadr pair))  ; frequency or weight
+                              (cadr pair))  ; frequency or weight
                   (make-leaf-set (cdr pairs))
       ))))
-
-(define sample-tree 
-  (make-code-tree (make-leaf `a 4)
-                  (make-code-tree 
-                    (make-leaf `b 2)
-                    (make-code-tree (make-leaf `c 1)
-                                    (make-leaf `d 1))
-                    )
-  ))
 
 (define (encode message tree)
   (if (null? message)
@@ -101,6 +73,35 @@
   
 )
 
-(define message `(a c a b b c a))
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
 
-(display (encode message sample-tree))
+; pairs 是有序的 从小到大
+
+; 1. 每次取最小的两个合并成新的
+; 2. 将新的加到(删掉刚刚两个最小的)列表中
+(define (successive-merge pairs)
+  (if (= (length pairs) 1)
+    (car pairs)
+    (let ((c-tree (make-code-tree (car pairs) (cadr pairs))))
+      (successive-merge (adjoin-set c-tree (cddr pairs)))))
+)
+
+(define pairs `(
+  (a 2) (na 16) 
+  (boom 1) (sha 3) 
+  (e 1) (f 2)
+  (get 2) (yip 9)
+  (job 2) (wah 1)
+  ))
+
+(define myTree (generate-huffman-tree pairs))
+
+(define message `(Get a job
+  Sha na na na na na na na na
+  Get a job
+  Sha na na na na na na na na
+  Wah yip yip yip yip yip yip yip yip yip
+  Sha boom))
+
+(display (encode message myTree))

@@ -45,8 +45,9 @@
       `()
       (let ((next-branch (choose-branch (car bits) current-branch)))
         (if (leaf? next-branch)
-          (cons (symbol-leaf next-branch) (decode-1 (cdr bits) current-branch))
-          (decode-1 bits next-branch))))  
+          ; 重新一个了, 树得重头开始咯
+          (cons (symbol-leaf next-branch) (decode-1 (cdr bits) tree))
+          (decode-1 (cdr bits) next-branch))))  
   )
   (decode-1 bits tree)
 )
