@@ -1,0 +1,43 @@
+(define (make-withdraw balance password)
+  (define count 0)
+  (define (call-the-cops)
+    (display "call the cops"))
+  (define (wrong-pssword . args)
+    (display "wrong password!")
+    (set! count (+ count 1))
+    (if (= count 7)
+      (call-the-cops)
+      count
+      )  
+  )
+  (define (withdraw amount)
+    (if (> balance amount)
+      (begin (set! balance (- balance amount))
+              balance)
+      "insufficient funds"))
+  (define (deposit amount)
+    (set! balance (+ balance amount)))
+  (define (dispatch m password2)
+    (if (eq? password password2)
+      (cond ((eq? m `withdraw) withdraw)
+            ((eq? m `deposit) deposit)
+            (else (error "unkown request -- MAKE-ACCOUNT" m)))
+      wrong-pssword))
+    
+  dispatch   
+)
+
+(define (make-joint account password new-password)
+  (lambda (op input-password)
+    (cond ((eq? input-password new-password) (account op password))
+          (else (error "wrong password" input-password)))
+  )
+)
+
+(define acc (make-withdraw 100 `secret-password))
+
+(define paul-acc (make-joint acc `secret-password `new-password))
+
+((paul-acc `withdraw `new-password) 40)
+;((paul-acc `withdraw `other-password) 40)
+((acc `withdraw `secret-password) 40)
