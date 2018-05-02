@@ -14,39 +14,27 @@
     (define (lookup keys)
       (lookup-inner keys local-table))
     (define (lookup-inner keys table)
-      (let ((record (assoc (car keys) table)))
-        (cond ((null? record) #f)
+      (let ((record (assoc (car keys) (cdr table))))
+        (cond ((not record) #f)
               ((null? (cdr keys)) (cdr record))
               (else (lookup-inner (cdr keys) record))
               )))
     (define (insert! keys value)
       (insert-inner! keys value local-table))
     (define (insert-inner! keys value table)
-      (let ((subtable (assoc (car key) table)))
+      (let ((subtable (assoc (car keys) (cdr table))))
         (if (null? (cdr keys))
-          (set-cdr! subtable value)
-          ())))
-    ; (define (lookup key-1 key-2)
-    ;   (let ((subtable (assoc key-1 (cdr local-table))))
-    ;     (if subtable
-    ;       (let ((record (assoc key-2 (cdr subtable))))
-    ;         (if record
-    ;           (cdr record)
-    ;           #f))
-    ;       #f)))
-    (define (insert! key-1 key-2 value)
-      (let ((subtable (assoc key-1 (cdr local-table))))
-        (if subtable
-          (let ((record (assoc key-2 (cdr subtable))))
-            (if record 
-              (set-cdr! record value)
-              (set-cdr! subtable
-                        (cons (cons key-2 value)
-                              (cdr subtable)))))
-          (set-cdr! local-table
-                    (cons (list key-1
-                                (cons key-2 value))
-                          (cdr local-table)))))
+          (if subtable
+            (set-cdr! subtable value)
+            (set-cdr! table 
+                      (cons (cons (car keys) value)
+                            (cdr table))))
+          (if subtable
+            (insert-inner! (cdr keys) value subtable)
+            (begin (set-cdr! table
+                            (cons (list (car keys))
+                                  (cdr table)))
+                    (insert-inner! (cdr keys) value (cadr table))))))
       `ok)
     (define (dispatch m)
       (cond ((eq? m `lookup-proc) lookup)
@@ -54,3 +42,20 @@
             (else (error "Unknown operation -- TABLE" m))
             ))
     dispatch))
+
+(define operation-table (make-table equal?))
+(define get (operation-table `lookup-proc))
+(define put (operation-table `insert-proc!))
+
+(define keys `(a b c d))
+(define keys2 `(a b c e))
+
+(get keys)
+(get keys2)
+
+
+(put keys 2)
+(put keys2 2)
+
+(get keys)
+(get keys2)
